@@ -78,43 +78,47 @@ const learnerSubmissions = [
 
 ///////////////////////////////////////
 
-function getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions) {
-  let assignments = assignmentGroup.assignments;
-  let result = [];
+function getLearnerData(courseInfo, assignmentGroup, learnerSubmissions) {
+ 
+    if (courseInfo.id !== assignmentGroup.course_id){
+      throw new Error('Miss Matching Course ID')
+    }
+  
+    let assignments = assignmentGroup.assignments;
+    let result = [];
 
+    for (let learner of learnerSubmissions) {
+      let learner_result = { id: learner.learner_id, avg: 0 };
+      let submission_result = { id: learner.learner_id, avg: 0 };
 
-  // current is 1 result PER SUBMISSION
-  for (let learner of learnerSubmissions) {
-      let learner_result = {'id': learner.learner_id, 'avg': 0};
-      let submission_result = {'id': learner.learner_id, 'avg': 0};
       let max_total = 0;
- 
-      try {
- 
-  for (let i=0; i<assignments.length; i++) {
+
+      for (let i = 0; i < assignments.length; i++) {
         const assignment = assignments[i];
 
-        if ( assignment.id === learner.assignment_id ) {
-            submission_result['avg'] += learner.submission.score;
-            // @ts-ignore
-            learner_result[assignment.id] = learner.submission.score / assignment.points_possible;
-            max_total += assignment.points_possible;
-            break;
+        if (assignment.id === learner.assignment_id) {
+          submission_result["avg"] += learner.submission.score;
+
+          learner_result[assignment.id] =
+            learner.submission.score / assignment.points_possible;
+          max_total += assignment.points_possible;
+          break;
         }
-        // here
+      }
+      submission_result["avg"] /= max_total;
+
+      console.log(submission_result);
+      result.push(submission_result);
     }
-submission_result['avg'] /= max_total;
 
+  return result;
+  
 
-} catch (OHNOOO) {
-	console.log(OHNOOO);
+  } 
 
-    console.log(submission_result);
-    result.push(submission_result);
-}
-
-return result;
-}
-
-const result = getLearnerData(courseInfo, assignmentGroup, learnerSubmissions);
+  const result = getLearnerData(
+    courseInfo,
+    assignmentGroup,
+    learnerSubmissions
+  );
 
